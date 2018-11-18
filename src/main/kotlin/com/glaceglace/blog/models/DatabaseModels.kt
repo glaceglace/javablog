@@ -5,37 +5,37 @@ import javax.persistence.*
 
 @Entity
 class Article(
-        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int,
-        val authorName: String,
-        val title: String,
-        val content: String,
-        @ManyToMany(cascade = [CascadeType.ALL]) val tags: List<Tag> = emptyList(),
-        @ManyToOne(cascade = [CascadeType.MERGE]) val catalogue: Catalogue,
-        val viewNumber: Int = 0,
-        val createdTime: Date,
-        val editedTiem: Date,
-        @OneToMany(cascade = [CascadeType.ALL]) val comments: List<Comment> = emptyList()
+        @OneToMany(cascade = [CascadeType.ALL]) var comments: List<Comment> = emptyList(),
+        var authorName: String,
+        var title: String,
+        var content: String,
+        @ManyToMany(cascade = [CascadeType.ALL]) var tags: List<Tag> = emptyList(),
+        @ManyToOne(cascade = [CascadeType.MERGE]) var catalogue: Catalogue,
+        var viewNumber: Int = 0,
+        var createdTime: Date,
+        var editedTiem: Date,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int = 0
 )
 
 @Entity
 class Tag(
-        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int,
-        @Column(unique = true) val tagName: String
+        @Column(unique = true) var tagName: String,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int = 0
 
 
 )
 
 @Entity
 class Catalogue(
-        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int,
-        @Column(unique = true) val catalogueName: String
-        )
+        @Column(unique = true) var catalogueName: String,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int = 0
+)
 
 @Entity
 class Comment(
-        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int,
-        val fromUsr: String,
-        @Column(nullable = true) val toUsr: String?,
-        val content: String,
-        val createdTime: Date
+        var createdTime: Date,
+        var fromUsr: String,
+        @Column(nullable = true) var toUsr: String?,
+        var content: String,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int = 0
 )
