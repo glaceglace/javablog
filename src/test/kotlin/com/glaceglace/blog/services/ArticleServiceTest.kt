@@ -1,8 +1,11 @@
 package com.glaceglace.blog.services
 
+import com.glaceglace.blog.models.Article
 import com.glaceglace.blog.models.Catalogue
 import com.glaceglace.blog.models.Tag
+import com.glaceglace.blog.repositories.ArticleRepository
 import com.glaceglace.blog.repositories.CatalogueRepository
+import com.glaceglace.blog.repositories.TagRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -24,6 +27,12 @@ class ArticleServiceTest {
     @SpyBean
     lateinit var catalogueRepository: CatalogueRepository
 
+    @Autowired
+    lateinit var tagRepository: TagRepository
+
+    @Autowired
+    lateinit var articleRepository: ArticleRepository
+
     @BeforeEach
     fun setData() {
     }
@@ -31,11 +40,17 @@ class ArticleServiceTest {
     @Test
     @DisplayName("when call get by id with good id, then it shall return a good article")
     fun testGetArticleById() {
-        val article = articleService.addNewArticle("author", "title", "content", arrayListOf(Tag("tag", 0)), Catalogue("cat", 0))
+        val article = prepareArticle()
         val articleFromDb = articleService.getArticleDetailById(article.id)
-        assertThat(article.authorName).isEqualTo("author")
+        assertThat(article.authorName).isEqualTo("auth")
         assertThat(article.id).isNotEqualTo(0)
         assertThat(articleFromDb.id).isEqualTo(article.id)
-        assertThat(articleFromDb.authorName).isEqualTo("author")
+        assertThat(articleFromDb.authorName).isEqualTo("auth")
+    }
+
+    fun prepareArticle(): Article {
+        val tag = tagRepository.save(Tag("totoTag"))
+        val cat = catalogueRepository.save(Catalogue("totoCat"))
+        return articleRepository.save(Article(cat, "auth", "title", "content", mutableListOf(tag)))
     }
 }

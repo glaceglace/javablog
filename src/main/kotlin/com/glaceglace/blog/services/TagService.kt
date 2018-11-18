@@ -13,6 +13,7 @@ interface ITagService {
     fun modifyOneTag(id: Int, newName: String): Tag
     fun getOneTagById(id: Int): Tag
     fun getAllTags(): List<Tag>
+    fun getTagsByIds(ids: Array<Int>): MutableList<Tag>
 }
 
 @Service
@@ -21,6 +22,16 @@ class TagService @Autowired constructor(val tagRepository: TagRepository) : ITag
         val list: List<Tag>
         try {
             list = tagRepository.findAll().asSequence().toList()
+        } catch (e: Exception) {
+            throw RepositoryException("Error from tag repository. Nested exception is { ${e.message} }")
+        }
+        return list
+    }
+
+    override fun getTagsByIds(ids: Array<Int>): MutableList<Tag> {
+        val list: MutableList<Tag>
+        try {
+            list = tagRepository.findAllById(ids.toMutableList()).asSequence().toMutableList()
         } catch (e: Exception) {
             throw RepositoryException("Error from tag repository. Nested exception is { ${e.message} }")
         }

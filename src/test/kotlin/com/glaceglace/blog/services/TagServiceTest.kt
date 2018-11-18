@@ -136,4 +136,16 @@ internal class TagServiceTest {
         assertThat(response.map { it.tagName }).contains("popo")
         println(response.map { it.id })
     }
+
+    @Test
+    @DisplayName("when find specified tags with ok, then it shall return a list")
+    fun testFindAllByIds() {
+        val tag = tagRepository.saveAll(listOf(Tag("papa"), Tag("pipi"),
+                Tag("popo")))
+        val response = tagService.getTagsByIds(arrayOf(tag.first().id, tag.last().id))
+
+        assertThat(response.size).isEqualTo(2)
+        assertThat(response.map { it.tagName }).contains("papa")
+        assertThat(response.map { it.tagName }).contains("popo")
+    }
 }

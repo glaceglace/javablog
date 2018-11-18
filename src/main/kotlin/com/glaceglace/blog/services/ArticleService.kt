@@ -1,18 +1,18 @@
 package com.glaceglace.blog.services
 
+import com.glaceglace.blog.exceptions.ErrorParameterException
+import com.glaceglace.blog.exceptions.RepositoryException
 import com.glaceglace.blog.models.Article
-import com.glaceglace.blog.models.Catalogue
-import com.glaceglace.blog.models.Tag
 import com.glaceglace.blog.repositories.ArticleRepository
-import com.glaceglace.blog.repositories.CatalogueRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.sql.Date
 
 @Service
 class ArticleService @Autowired constructor(
         val articleRepository: ArticleRepository,
-        val catalogueRepository: CatalogueRepository
+        val catalogueService: ICatalogueService,
+        val tagService: ITagService,
+        val commentService: ICommentService
 ) : IArticleService {
     override fun getArticleDetailById(articleId: Int): Article {
         return articleRepository.findById(articleId).get()
@@ -26,30 +26,39 @@ class ArticleService @Autowired constructor(
             author: String,
             title: String,
             content: String,
-            tagList: ArrayList<Tag>,
-            catalogue: Catalogue
+            tagIds: MutableList<Int>,
+            catalogueId: Int
     ): Article {
+        if (author.isBlank() || title.isBlank() || content.isBlank()) throw ErrorParameterException("Parameter can not be blank")
+        val cat = catalogueService.getOneCatalogueById(catalogueId)
+        val tags = tagService.getTagsByIds(tagIds.toTypedArray())
         val article = Article(
-                catalogue = catalogue,
+                catalogue = cat,
                 authorName = author,
                 title = title,
                 content = content,
-                tags = tagList,
-                editedTiem = Date(java.util.Date().time),
-                createdTime = Date(java.util.Date().time),
-                id = 0
+                tags = tags
         )
-        return articleRepository.save(article)
+        try {
+            return articleRepository.save(article)
+        } catch (e: Exception) {
+            throw RepositoryException("Error from article repository. Nested exception is { ${e.message} }")
+        }
+
     }
 
-    override fun getAllArticles(): List<Article> {
-        return articleRepository.findAll().toList()
+    override fun getAllArticles(): MutableList<Article> {
+        try {
+            return articleRepository.findAll().toMutableList()
+        } catch (e: Exception) {
+            throw RepositoryException("Error from article repository. Nested exception is { ${e.message} }")
+        }
     }
 }
 
 interface IArticleService {
     fun getArticleDetailById(articleId: Int): Article
-    fun addNewArticle(author: String, title: String, content: String, tagList: ArrayList<Tag>, catalogue: Catalogue): Article
+    fun addNewArticle(author: String, title: String, content: String, tagIds: MutableList<Int>, catalogueId: Int): Article
     fun deleteOneArticleById(articleId: Int)
-    fun getAllArticles(): List<Article>
+    fun getAllArticles(): MutableList<Article>
 }
