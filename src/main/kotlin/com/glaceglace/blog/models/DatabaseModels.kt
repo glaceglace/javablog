@@ -5,15 +5,15 @@ import javax.persistence.*
 
 @Entity
 class Article(
-        @OneToMany(cascade = [CascadeType.ALL]) var comments: List<Comment> = emptyList(),
+        @ManyToOne(cascade = [CascadeType.ALL]) var catalogue: Catalogue,
         var authorName: String,
         var title: String,
         var content: String,
-        @ManyToMany(cascade = [CascadeType.ALL]) var tags: List<Tag> = emptyList(),
-        @ManyToOne(cascade = [CascadeType.MERGE]) var catalogue: Catalogue,
+        @ManyToMany(cascade = [CascadeType.ALL]) var tags: MutableList<Tag> = mutableListOf(),
         var viewNumber: Int = 0,
-        var createdTime: Date,
-        var editedTiem: Date,
+        @OneToMany(cascade = [CascadeType.ALL]) var comments: MutableList<Comment> = mutableListOf(),
+        var editedTiem: Date = Date(java.util.Date().time),
+        var createdTime: Date = Date(java.util.Date().time),
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int = 0
 )
 
@@ -32,9 +32,10 @@ class Catalogue(
 
 @Entity
 class Comment(
-        var createdTime: Date,
-        var fromUsr: String,
-        @Column(nullable = true) var toUsr: String?,
         var content: String,
+        @ManyToOne(cascade = [CascadeType.ALL])  var article: Article,
+        var fromUsr: String,
+        @Column(nullable = true) var toUsr: String? = null,
+        var createdTime: Date = Date(java.util.Date().time),
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int = 0
 )

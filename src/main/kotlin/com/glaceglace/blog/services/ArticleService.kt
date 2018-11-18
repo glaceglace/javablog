@@ -30,13 +30,13 @@ class ArticleService @Autowired constructor(
             catalogue: Catalogue
     ): Article {
         val article = Article(
+                catalogue = catalogue,
                 authorName = author,
                 title = title,
                 content = content,
                 tags = tagList,
-                catalogue = catalogue,
-                createdTime = Date(java.util.Date().time),
                 editedTiem = Date(java.util.Date().time),
+                createdTime = Date(java.util.Date().time),
                 id = 0
         )
         return articleRepository.save(article)
