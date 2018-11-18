@@ -46,7 +46,6 @@ class CatalogueService @Autowired constructor(val catalogueRepository: Catalogue
         } catch (e: Exception) {
             throw RepositoryException("Error from catalogue repository. Nested exception is { ${e.message} }")
         }
-
     }
 
     override fun modifyOneCatalogue(id: Int, newName: String): Catalogue {
@@ -58,7 +57,6 @@ class CatalogueService @Autowired constructor(val catalogueRepository: Catalogue
         } catch (e: Exception) {
             throw RepositoryException("Error from catalogue repository. Nested exception is { ${e.message} }")
         }
-
     }
 
     override fun getOneCatalogueById(id: Int): Catalogue {

@@ -127,7 +127,7 @@ internal class CatalogueServiceTest {
     fun testFindAll() {
         val cat = catalogueRepository.saveAll(listOf(Catalogue("papa"), Catalogue("pipi"),
                 Catalogue("popo")))
-        val response =catalogueService.getAllCatalogues()
+        val response = catalogueService.getAllCatalogues()
 
         assertThat(response.size).isEqualTo(3)
         assertThat(response.map { it.catalogueName }).contains("papa")

@@ -1,18 +1,12 @@
 package com.glaceglace.blog.services
 
-import com.glaceglace.blog.exceptions.ErrorParameterException
-import com.glaceglace.blog.exceptions.RepositoryException
 import com.glaceglace.blog.models.Catalogue
 import com.glaceglace.blog.models.Tag
 import com.glaceglace.blog.repositories.CatalogueRepository
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doThrow
-import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,10 +24,8 @@ class ArticleServiceTest {
     @SpyBean
     lateinit var catalogueRepository: CatalogueRepository
 
-
     @BeforeEach
     fun setData() {
-
     }
 
     @Test
@@ -46,7 +38,4 @@ class ArticleServiceTest {
         assertThat(articleFromDb.id).isEqualTo(article.id)
         assertThat(articleFromDb.authorName).isEqualTo("author")
     }
-
-
-
 }

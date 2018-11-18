@@ -22,7 +22,6 @@ class Tag(
         @Column(unique = true) var tagName: String,
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int = 0
 
-
 )
 
 @Entity

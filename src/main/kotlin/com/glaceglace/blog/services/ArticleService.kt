@@ -19,12 +19,16 @@ class ArticleService @Autowired constructor(
     }
 
     override fun deleteOneArticleById(articleId: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
     }
 
-
-    override fun addNewArticle(author: String, title: String, content: String, tagList: ArrayList<Tag>,
-                               catalogue: Catalogue): Article {
+    override fun addNewArticle(
+            author: String,
+            title: String,
+            content: String,
+            tagList: ArrayList<Tag>,
+            catalogue: Catalogue
+    ): Article {
         val article = Article(
                 authorName = author,
                 title = title,
@@ -38,11 +42,9 @@ class ArticleService @Autowired constructor(
         return articleRepository.save(article)
     }
 
-
     override fun getAllArticles(): List<Article> {
         return articleRepository.findAll().toList()
     }
-
 }
 
 interface IArticleService {
@@ -50,6 +52,4 @@ interface IArticleService {
     fun addNewArticle(author: String, title: String, content: String, tagList: ArrayList<Tag>, catalogue: Catalogue): Article
     fun deleteOneArticleById(articleId: Int)
     fun getAllArticles(): List<Article>
-
-
 }
