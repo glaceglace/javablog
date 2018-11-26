@@ -1,11 +1,15 @@
 package com.glaceglace.blog.services
 
+import com.glaceglace.blog.exceptions.ArticleNotFoundException
 import com.glaceglace.blog.exceptions.ErrorParameterException
 import com.glaceglace.blog.exceptions.RepositoryException
 import com.glaceglace.blog.models.Article
+import com.glaceglace.blog.models.Catalogue
+import com.glaceglace.blog.models.Tag
 import com.glaceglace.blog.repositories.ArticleRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class ArticleService @Autowired constructor(
@@ -15,11 +19,23 @@ class ArticleService @Autowired constructor(
         val commentService: ICommentService
 ) : IArticleService {
     override fun getArticleDetailById(articleId: Int): Article {
-        return articleRepository.findById(articleId).get()
+        try {
+            return articleRepository.findById(articleId).get()
+        } catch (e: NoSuchElementException) {
+            throw ArticleNotFoundException()
+        } catch (e: Exception) {
+            throw RepositoryException("Error from article repository, nested exception is { ${e.message} }")
+        }
     }
 
     override fun deleteOneArticleById(articleId: Int) {
-        TODO("not implemented") // To change body of created functions use File | Settings | File Templates.
+        try {
+            return articleRepository.deleteById(articleId)
+        } catch (e: NoSuchElementException) {
+            throw ArticleNotFoundException()
+        } catch (e: Exception) {
+            throw RepositoryException("Error from article repository, nested exception is { ${e.message} }")
+        }
     }
 
     override fun addNewArticle(
@@ -30,8 +46,15 @@ class ArticleService @Autowired constructor(
             catalogueId: Int
     ): Article {
         if (author.isBlank() || title.isBlank() || content.isBlank()) throw ErrorParameterException("Parameter can not be blank")
-        val cat = catalogueService.getOneCatalogueById(catalogueId)
-        val tags = tagService.getTagsByIds(tagIds.toTypedArray())
+        val cat: Catalogue
+        val tags: MutableList<Tag>
+        try {
+            cat = catalogueService.getOneCatalogueById(catalogueId)
+            tags = tagService.getTagsByIds(tagIds.toTypedArray())
+        } catch (e: Exception) {
+            throw  RepositoryException("Error from Tag/Catalogue repository. Nested exception is { ${e.message} }")
+        }
+
         val article = Article(
                 catalogue = cat,
                 authorName = author,
@@ -44,6 +67,18 @@ class ArticleService @Autowired constructor(
         } catch (e: Exception) {
             throw RepositoryException("Error from article repository. Nested exception is { ${e.message} }")
         }
+
+    }
+
+    override fun modifyOneArticle(articleId: Int, newContent: String?, newTitle: String?, newCat: Catalogue?, newTags: MutableList<Tag>?): Article {
+        val article = articleRepository.findById(articleId).get()
+
+        if (!newContent.isNullOrBlank()) article.content = newContent!!
+
+        if (!newTitle.isNullOrBlank()) article.title = newTitle!!
+        if (newCat != null) article.catalogue = newCat
+        if (newTags != null) article.tags = newTags
+        return articleRepository.save(article)
 
     }
 
@@ -61,4 +96,5 @@ interface IArticleService {
     fun addNewArticle(author: String, title: String, content: String, tagIds: MutableList<Int>, catalogueId: Int): Article
     fun deleteOneArticleById(articleId: Int)
     fun getAllArticles(): MutableList<Article>
+    fun modifyOneArticle(articleId: Int, newContent: String?, newTitle: String?, newCat: Catalogue?, newTags: MutableList<Tag>?): Article
 }

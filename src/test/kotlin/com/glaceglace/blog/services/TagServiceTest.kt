@@ -2,17 +2,18 @@ package com.glaceglace.blog.services
 
 import com.glaceglace.blog.exceptions.ErrorParameterException
 import com.glaceglace.blog.exceptions.RepositoryException
+import com.glaceglace.blog.models.Article
+import com.glaceglace.blog.models.Catalogue
 import com.glaceglace.blog.models.Tag
+import com.glaceglace.blog.repositories.ArticleRepository
+import com.glaceglace.blog.repositories.CatalogueRepository
 import com.glaceglace.blog.repositories.TagRepository
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doThrow
 import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.whenever
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -31,6 +32,12 @@ internal class TagServiceTest {
 
     @Autowired
     lateinit var tagService: ITagService
+
+    @Autowired
+    lateinit var catalogueRepository: CatalogueRepository
+
+    @Autowired
+    lateinit var articleRepository: ArticleRepository
 
     @BeforeEach
     fun setup() {
@@ -137,6 +144,17 @@ internal class TagServiceTest {
         println(response.map { it.id })
     }
 
+    @Disabled
+    @Test
+    @DisplayName("when delete a tag of an article, it shall be deleted, but article shall remain")
+    fun testDelete2() {
+        val article = prepareArticle()
+        assertThat(articleRepository.findById(article.id).get().tags.size).isEqualTo(3)
+        tagService.deleteOneTag(article.tags.first().id)
+        assertThat(articleRepository.findById(article.id).get().tags.size).isEqualTo(2)
+
+    }
+
     @Test
     @DisplayName("when find specified tags with ok, then it shall return a list")
     fun testFindAllByIds() {
@@ -147,5 +165,13 @@ internal class TagServiceTest {
         assertThat(response.size).isEqualTo(2)
         assertThat(response.map { it.tagName }).contains("papa")
         assertThat(response.map { it.tagName }).contains("popo")
+    }
+
+    fun prepareArticle(): Article {
+        val tag = tagRepository.save(Tag("totoTag"))
+        val tag2 = tagRepository.save(Tag("totoTag2"))
+        val tag3 = tagRepository.save(Tag("totoTag3"))
+        val cat = catalogueRepository.save(Catalogue("totoCat"))
+        return articleRepository.save(Article(cat, "auth", "title", "content", mutableListOf(tag, tag2, tag3)))
     }
 }

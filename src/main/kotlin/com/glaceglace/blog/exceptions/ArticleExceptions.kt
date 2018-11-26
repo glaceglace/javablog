@@ -4,3 +4,4 @@ open class BlogException(override val message: String, val errorCode: Int) : Run
 
 class ErrorParameterException(message: String) : BlogException(message, 1001)
 class RepositoryException(message: String = "Error from repository communication") : BlogException(message, 1002)
+class ArticleNotFoundException(message: String = "Can not find this article"):BlogException(message,1003)
