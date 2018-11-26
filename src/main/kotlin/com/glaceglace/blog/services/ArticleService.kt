@@ -9,6 +9,7 @@ import com.glaceglace.blog.models.Tag
 import com.glaceglace.blog.repositories.ArticleRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.sql.Date
 import java.util.*
 
 @Service
@@ -71,14 +72,26 @@ class ArticleService @Autowired constructor(
     }
 
     override fun modifyOneArticle(articleId: Int, newContent: String?, newTitle: String?, newCat: Catalogue?, newTags: MutableList<Tag>?): Article {
-        val article = articleRepository.findById(articleId).get()
+        var article: Article? = null
+        try {
+            article = articleRepository.findById(articleId).get()
+            if (!newContent.isNullOrBlank()) article.content = newContent!!
 
-        if (!newContent.isNullOrBlank()) article.content = newContent!!
+            if (!newTitle.isNullOrBlank()) article.title = newTitle!!
+            if (newCat != null) article.catalogue = newCat
+            if (newTags != null) article.tags = newTags
+            if (!newContent.isNullOrBlank() || !newTitle.isNullOrBlank()) article.editedTime = Date(java.util.Date().time)
+        } catch (e: Exception) {
+            ArticleNotFoundException("Can't find article, nested exception is { ${e.message} }")
+        }
 
-        if (!newTitle.isNullOrBlank()) article.title = newTitle!!
-        if (newCat != null) article.catalogue = newCat
-        if (newTags != null) article.tags = newTags
-        return articleRepository.save(article)
+        try {
+            return articleRepository.save(article!!)
+        } catch (e: NullPointerException) {
+            throw ArticleNotFoundException("Article is null")
+        } catch (e: java.lang.Exception) {
+            throw RepositoryException("Error from articleRepository, nested exception is { ${e.message} }")
+        }
 
     }
 

@@ -12,7 +12,7 @@ class Article(
         @ManyToMany(cascade = [CascadeType.ALL],mappedBy = "articles",fetch = FetchType.EAGER) var tags: MutableList<Tag> = mutableListOf(),
         var viewNumber: Int = 0,
         @OneToMany(cascade = [CascadeType.ALL]) var comments: MutableList<Comment> = mutableListOf(),
-        var editedTiem: Date = Date(java.util.Date().time),
+        var editedTime: Date = Date(java.util.Date().time),
         var createdTime: Date = Date(java.util.Date().time),
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) val id: Int = 0
 )

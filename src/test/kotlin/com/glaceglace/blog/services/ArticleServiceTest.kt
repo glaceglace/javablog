@@ -38,12 +38,12 @@ class ArticleServiceTest {
     @Autowired
     lateinit var tagRepository: TagRepository
 
-    @Autowired
+    @SpyBean
     lateinit var articleRepository: ArticleRepository
 
     @BeforeEach
     fun setData() {
-        reset(catalogueRepository)
+        reset(catalogueRepository, articleRepository)
     }
 
     @Test
@@ -110,7 +110,64 @@ class ArticleServiceTest {
         assertThrows<RepositoryException> { articleService.deleteOneArticleById(123) }
     }
 
+    @Test
+    @DisplayName("when modify one article with success, then it shall be modified")
+    fun testModify() {
+        val article = prepareArticle()
+        val newCat = catalogueRepository.save(Catalogue("newCat"))
+        articleService.modifyOneArticle(article.id, "titi", "tata", newCat, null)
+        val response = articleRepository.findById(article.id).get()
+        assertThat(response.content).isEqualTo("titi")
+        assertThat(response.title).isEqualTo("tata")
+        assertThat(response.catalogue.catalogueName).isEqualTo("newCat")
+        assertThat(response.tags.size).isEqualTo(1)
+        assertThat(response.tags.first().tagName).isEqualTo("totoTag")
+    }
+
+    @Test
+    @DisplayName("when modify one article with success, and catalogue is null, then it shall be modified and keep the same catalogue ")
+    fun testModify11() {
+        val article = prepareArticle()
+        val newTag = tagRepository.save(Tag("pipi"))
+        articleService.modifyOneArticle(article.id, "titi", "tata", null, mutableListOf(newTag))
+        val response = articleRepository.findById(article.id).get()
+        assertThat(response.content).isEqualTo("titi")
+        assertThat(response.title).isEqualTo("tata")
+        assertThat(response.catalogue.catalogueName).isEqualTo("totoCat")
+        assertThat(response.tags.size).isEqualTo(1)
+        assertThat(response.tags.first().tagName).isEqualTo("pipi")
+    }
+
+    @Test
+    @DisplayName("when modify and no article found , then it shall throw an exception")
+    fun testModify2() {
+        assertThrows<ArticleNotFoundException> { articleService.modifyOneArticle(123, "toto", "titi", null, null) }
+    }
+
+    @Test
+    @DisplayName("when modify but saving with error, then it shall throw an exception")
+    fun testModify3() {
+        val article = prepareArticle()
+        doThrow(java.lang.RuntimeException()).whenever(articleRepository).save(any<Article>())
+
+        assertThrows<RepositoryException> { articleService.modifyOneArticle(article.id, "titi", "tata", null, null) }
+
+    }
+
+    @Test
+    @DisplayName("when get all articles, then it shall return a list of articles")
+    fun testGetAll() {
+        val tag = tagRepository.save(Tag("totoTag"))
+        val cat = catalogueRepository.save(Catalogue("totoCat"))
+        articleRepository.save(Article(cat, "auth", "title", "content", mutableListOf(tag)))
+        articleRepository.save(Article(cat, "auth", "title", "content", mutableListOf(tag)))
+        articleRepository.save(Article(cat, "auth", "title", "content", mutableListOf(tag)))
+        val articles = articleService.getAllArticles()
+        assertThat(articles.size).isEqualTo(3)
+    }
+
     fun prepareArticle(): Article {
+
         val tag = tagRepository.save(Tag("totoTag"))
         val cat = catalogueRepository.save(Catalogue("totoCat"))
         return articleRepository.save(Article(cat, "auth", "title", "content", mutableListOf(tag)))
